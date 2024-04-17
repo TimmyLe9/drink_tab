@@ -1,0 +1,123 @@
+  /* Variables */
+  var Sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Tab");
+  var inputName = Sheet.getRange("A2").getValue();
+  var inputDrink = Sheet.getRange("B2").getValue();
+  var inputQuantity = Sheet.getRange("D2").getValue();
+  
+function onEdit(e) {
+/* Hiding tabs information 
+if (e.range.getA1Notation() === 'A2' || e.range.getA1Notation() === 'B2' || e.range.getA1Notation() === 'C2' || e.range.getA1Notation() === 'D2' || e.range.getA1Notation() === 'E2' || e.range.getA1Notation() === 'F2') {
+Sheet.hideRows(20,43); 
+} */
+
+  if (!Sheet.getRange("A2").isBlank()) {
+    currentTab(); // Showing current tab
+  }
+
+  if (Sheet.getRange("D2").getValue() == "0") {
+    clearBoxes(); // Clear input boxes
+  }
+
+  if (Sheet.getRange("D43").isChecked()) {
+    resetTab();
+  }
+
+  if (Sheet.getRange("E2").isChecked() && !Sheet.getRange("A2").isBlank() && !Sheet.getRange("B2").isBlank() && !Sheet.getRange("D2").isBlank()) {
+    calculate(); // Calculate tab
+  }
+
+}
+
+/* Showing Current tab */
+function currentTab() {
+	for (var a = 21; a < 41; a++) {
+  var tempName = Sheet.getRange(a, 2).getValue();
+  if (inputName == tempName) {
+    var curTab = Sheet.getRange(a, 3).getValue();
+    Sheet.getRange("F2").setValue(curTab);
+    break;
+  }
+}
+Sheet.hideRows(20,43)
+}
+
+/* Clear Values of 'inputs' if Cell C2 is '0' */
+function clearBoxes() {
+  Sheet.getRange("A2:D2").clearContent();
+  Sheet.getRange("E2").setValue("FALSE");
+  Sheet.getRange("F2").clearContent();
+  Sheet.hideRows(20,43);
+}
+
+/* Clear Values on 'tabs' if checked */
+function resetTab() {
+  for (var z = 21; z < 41; z++) {
+    if (!Sheet.getRange(z, 2).isBlank()) {
+    var tempPrice = Sheet.getRange(z, 3).getValue();
+    Sheet.getRange(z, 4).setValue(tempPrice); // Previous Tab
+    Sheet.getRange(z, 1).setValue(tempPrice); // Owe Tab
+  } else {
+    break;
+  }
+  }
+  Sheet.getRange('C21:C40').clearContent();
+  Sheet.getRange("D43").setValue("FALSE");
+  Sheet.hideRows(20,43);
+  }
+
+/* Calculating tab (after confirming) */
+function calculate() {
+ for (var pos = 21; pos < 41; pos++) { // Name
+    var dataName = Sheet.getRange(pos, 2).getValue();
+    if (inputName == dataName) {
+      for (var i = 21; i < 41; i++) { // Item
+        if (inputDrink == Sheet.getRange(i, 5).getValue()) { // Pricing
+          var oldPrice = Sheet.getRange(pos, 3).getValue();
+          Sheet.getRange(pos, 4).setValue(oldPrice);
+          var price = Sheet.getRange(i, 6).getValue();
+          Sheet.getRange(pos, 3).setValue(oldPrice + (price*inputQuantity));
+          break;
+        }
+      }
+      break;
+    }
+  }
+  Sheet.getRange("E2").setValue("FALSE");
+  Sheet.getRange("A2:D2").clearContent();
+  Sheet.getRange("F2").clearContent();
+  Sheet.hideRows(20,43);
+}
+
+/* Restroom */
+function Restroom() {
+  var rr = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("RR");
+  var check = true;
+
+  var size = 2;
+  var pos = 2;
+
+  while (rr.getRange(size, 1).getValue() != "") {
+    size += 1;
+  }
+
+if (rr.getRange(4, 4).isChecked()) {
+  var name = rr.getRange(3, 4).getValue();
+
+  while (check) {
+  var listName = rr.getRange(pos, 1).getValue();
+
+  if (listName == name) {
+    rr.getRange(size, 1).setValue(name);
+
+    for (var i = pos; i <= size + 2; i++) {
+      rr.getRange(i, 1).setValue(rr.getRange(i + 1, 1).getValue());
+    }
+    check = false;
+  } else {
+    pos++;
+  }
+  }
+}
+rr.getRange(4, 4).setValue(false);
+rr.getRange(3, 4).clearContent();
+}
